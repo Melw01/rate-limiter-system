@@ -1,22 +1,19 @@
 package com.Melw01.ratelimiter;
 
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Service;
 
-/**
- *
- */
+@Service
 public class RateLimiterService {
-    private final ConcurrentHashMap<String, TokenBucket> buckets = new ConcurrentHashMap<>();
-    private final int capacity;
-    private final long refillIntervalMs;
 
-    public RateLimiterService(int capacity, long refillIntervalMs) {
-        this.capacity = capacity;
-        this.refillIntervalMs = refillIntervalMs;
+    private final RateLimiter rateLimiter;
+
+    public RateLimiterService() {
+        // capacity = 5 requests
+        // refill = 2 tokens per second
+        this.rateLimiter = new TokenBucketRateLimiter(5, 2);
     }
 
-    public boolean allowRequest(String clientId) {
-        buckets.putIfAbsent(clientId, new TokenBucket(capacity, refillIntervalMs));
-        return buckets.get(clientId).allowRequest();
+    public boolean isAllowed(String key) {
+        return rateLimiter.allowRequest(key);
     }
 }
